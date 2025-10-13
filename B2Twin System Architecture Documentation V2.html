@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B2Twin System Architecture - Technical Documentation</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 0.75in;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: white;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      scroll-behavior: smooth;
+    }
+    
+    .cover-page {
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      text-align: center;
+      border-bottom: 4px solid #AB0520;
+      padding-bottom: 3rem;
+    }
+    
+    .cover-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #AB0520;
+      margin-bottom: 1rem;
+    }
+    
+    .cover-subtitle {
+      font-size: 1.8rem;
+      color: #0C234B;
+      margin-bottom: 2rem;
+    }
+    
+    .cover-meta {
+      font-size: 1.1rem;
+      color: #666;
+      margin: 0.5rem 0;
+    }
+    
+    .section-header {
+      page-break-before: always;
+      background: linear-gradient(135deg, #AB0520 0%, #0C234B 100%);
+      color: white;
+      padding: 2.5rem;
+      margin: 3rem -2rem 3rem -2rem;
+      border-radius: 10px;
+    }
+    
+    .section-number {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      opacity: 0.95;
+      margin-bottom: 0.5rem;
+    }
+    
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    
+    .section-description {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      line-height: 1.8;
+      max-width: 900px;
+    }
+    
+    .narrative-connector {
+      background: #f8f9fa;
+      border-left: 5px solid #AB0520;
+      padding: 2rem;
+      margin: 3rem 0;
+      font-style: italic;
+      color: #444;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+    
+    .diagram-section {
+      page-break-before: always;
+      margin: 4rem 0;
+      scroll-margin-top: 2rem;
+    }
+    
+    .diagram-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0C234B;
+      margin-bottom: 0.75rem;
+    }
+    
+    .diagram-subtitle {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+    
+    .diagram-container {
+      background: white;
+      border: 3px solid #0C234B;
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    
+    .diagram-container img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    
+    .explanation {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .explanation-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0C234B;
+      margin-bottom: 1.5rem;
+    }
+    
+    .explanation-text p {
+      color: #333;
+      line-height: 1.9;
+      margin-bottom: 1.5rem;
+    }
+    
+    .explanation-text strong {
+      color: #0C234B;
+    }
+    
+    .tech-stack-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .tech-stack-table thead {
+      background: linear-gradient(135deg, #0C234B 0%, #AB0520 100%);
+      color: white;
+    }
+    
+    .tech-stack-table th {
+      padding: 1.2rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .tech-stack-table td {
+      padding: 1.2rem;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 0.95rem;
+    }
+    
+    .tech-stack-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .tech-stack-table td:first-child {
+      font-weight: 600;
+      color: #0C234B;
+    }
+    
+    .tech-stack-table td:nth-child(2) {
+      color: #AB0520;
+      font-weight: 500;
+    }
+    
+    /* Navigation Controls */
+    .nav-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 1000;
+    }
+    
+    .nav-btn {
+      background: linear-gradient(135deg, #0C234B 0%, #AB0520 100%);
+      color: white;
+      border: none;
+      padding: 1rem 1.5rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+    
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .nav-btn:disabled:hover {
+      transform: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .progress-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #e0e0e0;
+      z-index: 1000;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #AB0520 0%, #0C234B 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .section-nav {
+      position: fixed;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 999;
+    }
+    
+    .section-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ccc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .section-dot:hover {
+      background: #AB0520;
+      transform: scale(1.3);
+    }
+    
+    .section-dot.active {
+      background: #0C234B;
+      width: 16px;
+      height: 16px;
+    }
+    
+    .section-dot:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 25px;
+      top: -5px;
+      background: #0C234B;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    @media print {
+      body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      .nav-container,
+      .progress-indicator,
+      .section-nav {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .section-nav {
+        display: none;
+      }
+      .nav-container {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        justify-content: space-between;
+      }
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Progress Indicator -->
+  <div class="progress-indicator">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  
+  <!-- Section Navigation Dots -->
+  <div class="section-nav" id="sectionNav">
+    <div class="section-dot active" data-section="0" data-label="Cover"></div>
+    <div class="section-dot" data-section="1" data-label="Introduction"></div>
+    <div class="section-dot" data-section="2" data-label="Ecosystem"></div>
+    <div class="section-dot" data-section="3" data-label="Data Pipeline"></div>
+    <div class="section-dot" data-section="4" data-label="RAG Training"></div>
+    <div class="section-dot" data-section="5" data-label="RL Loop"></div>
+    <div class="section-dot" data-section="6" data-label="Tech Stack"></div>
+    <div class="section-dot" data-section="7" data-label="Summary"></div>
+  </div>
+  
+  <!-- Navigation Buttons -->
+  <div class="nav-container">
+    <button class="nav-btn" id="prevBtn" onclick="navigatePage(-1)">
+      <span>←</span> Previous
+    </button>
+    <button class="nav-btn" id="nextBtn" onclick="navigatePage(1)">
+      Next <span>→</span>
+    </button>
+  </div>
+  
+  <!-- Cover Page -->
+  <div class="page-section" id="section-0">
+    <div class="cover-page">
+      <div class="cover-title">B2Twin System Architecture</div>
+      <div class="cover-subtitle">Technical Documentation</div>
+      <div class="cover-meta">Digital Twin of Biosphere 2 Innovation Pilot</div>
+      <div class="cover-meta">Part 2: System Architecture & Technical Design</div>
+      <div class="cover-meta" style="margin-top: 3rem; font-weight: 600;">University of Arizona | Biosphere 2 Innovation Center</div>
+    </div>
+  </div>
+
+  <!-- Introduction Section -->
+  <div class="page-section" id="section-1">
+    <div class="section-header">
+      <div class="section-number">PART 2</div>
+      <div class="section-title">System Architecture</div>
+      <div class="section-description">
+        A comprehensive technical framework for the B2Twin digital twin platform, 
+        illustrating the data pipeline, AI training architecture, and reinforcement 
+        learning loop that enables physical AI for autonomous ecosystem management.
+      </div>
+    </div>
+    
+    <div class="narrative-connector">
+      <strong>Strategic Context:</strong> This section forms the technical core of the B2Twin 
+      presentation. It provides a series of clear, layered diagrams that illustrate the 
+      system architecture, starting from a high-level ecosystem view, moving through the 
+      data ingestion pipeline, detailing the innovative AI training process, and culminating 
+      in the long-term vision of a closed-loop reinforcement learning system for robotics. 
+      Each diagram builds upon the previous, creating a cohesive technical narrative that 
+      demonstrates both sophistication and practical implementation.
+    </div>
+  </div>
+
+  <!-- Section 2.1: C4 Context Diagram -->
+  <div class="page-section" id="section-2">
+    <div class="diagram-section">
+      <div class="diagram-title">2.1 B2Twin Ecosystem: A High-Level View</div>
+      <div class="diagram-subtitle">C4 Context Diagram - System Interactions and Key Stakeholders</div>
+      
+      <div class="diagram-container">
+        <img src="diagram-1-context.png" alt="B2Twin C4 Context Diagram showing system stakeholders and relationships">
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Understanding the B2Twin Ecosystem</div>
+        <div class="explanation-text">
+          <p><strong>The Central Platform:</strong> At the heart of the system is the B2Twin Digital Twin Platform, 
+          which serves as the core infrastructure for data integration, AI modeling, and simulation. This platform 
+          is not merely a data repository—it is an active, intelligent system designed to bridge the physical and 
+          digital worlds.</p>
+          
+          <p><strong>Key User Groups:</strong> The platform serves multiple research communities. 
+          Biosphere 2 researchers use it to analyze real-world biome data and run virtual experiments. Graduate researchers 
+          leverage it to build cutting-edge AI models and create immersive XR visualizations. Global academic partners from 
+          institutions like CNRS and ENS collaborate on model validation and joint research initiatives. AI Systems Architects 
+          manage the underlying technical infrastructure and scale the system's capabilities.</p>
+          
+          <p><strong>Critical System Dependencies:</strong> The platform integrates with three 
+          essential external systems. The Biosphere 2 SCADA System provides real-time sensor and control data from thousands 
+          of physical sensors throughout the facility. The University of Arizona HPC clusters (Puma and Ocelote) provide the 
+          massive computational power required for large-scale AI model training and batch processing. NVIDIA Omniverse Cloud 
+          enables real-time, photorealistic simulation and serves as the training environment for autonomous mobile robots.</p>
+          
+          <p><strong>The Critical Feedback Loop:</strong> Most importantly, this diagram emphasizes 
+          the bi-directional nature of the system. The platform not only ingests real-time data from the physical Biosphere 2 
+          but is explicitly designed to provide actionable insights and optimized control strategies back to the research teams. 
+          This creates a true digital-physical feedback loop—a core principle of digital twin technology that transforms 
+          B2Twin from a passive monitoring system into an active decision support and optimization platform.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="narrative-connector">
+      <strong>From Ecosystem to Pipeline:</strong> Now that we understand the high-level context and key 
+      relationships, we can examine the specific technical architecture that enables this digital-physical 
+      coupling. The foundation of any real-time digital twin is its data backbone—the infrastructure that 
+      captures, processes, and stores the continuous stream of information from the physical world.
+    </div>
+  </div>
+
+  <!-- Section 2.2: Data Ingestion Pipeline -->
+  <div class="page-section" id="section-3">
+    <div class="diagram-section">
+      <div class="diagram-title">2.2 The Data Backbone: Real-Time Streaming Architecture</div>
+      <div class="diagram-subtitle">From Physical Sensors to AI-Ready Data Lakes</div>
+      
+      <div class="diagram-container">
+        <img src="diagram-2-pipeline.png" alt="Data ingestion pipeline from sensors to storage and AI training">
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">A Modern, Enterprise-Grade Data Infrastructure</div>
+        <div class="explanation-text">
+          <p><strong>Data Origin:</strong> The journey begins with thousands of physical sensors embedded throughout 
+          the Biosphere 2 biomes. These sensors continuously monitor temperature, humidity, CO2 levels, valve positions, 
+          fan speeds, and countless other parameters. The Niagara SCADA (Supervisory Control and Data Acquisition) system 
+          serves as the industrial-grade control platform that manages these sensors and actuators.</p>
+          
+          <p><strong>The Streaming Core:</strong> Data flows from Niagara via MQTT (Message 
+          Queuing Telemetry Transport), a lightweight messaging protocol ideal for IoT applications, into an Apache Kafka 
+          event streaming platform. This architectural choice is crucial. Kafka is the industry standard for high-throughput, 
+          low-latency, fault-tolerant data streaming. It ensures that our digital twin can react to changes in the physical 
+          facility in milliseconds, not hours. This is not batch processing—this is true real-time digital twin technology.</p>
+          
+          <p><strong>Processing and Enrichment:</strong> Raw sensor data flows through Kafka 
+          topics (logical channels like 'rainforest-raw' and 'rainforest-processed'). Stream processing engines like Kafka 
+          Streams or Apache Flink perform real-time transformations, filtering, aggregation, and enrichment. This is where 
+          raw voltage readings become calibrated temperatures, and individual sensor readings are contextualized with 
+          operational state information.</p>
+          
+          <p><strong>Dual Storage Strategy:</strong> Processed data is routed to two specialized 
+          storage systems optimized for different use cases. TimescaleDB, a PostgreSQL extension optimized for time-series data, 
+          provides high-performance storage for real-time querying, visualization, and operational dashboards. Simultaneously, 
+          data is archived to an AWS S3 Data Lake with both raw and curated zones, providing cost-effective, long-term storage 
+          for large-scale AI model training and historical analysis.</p>
+          
+          <p><strong>Foundation for Intelligence:</strong> This robust, modern architecture ensures 
+          data integrity, scalability, and resilience. It provides the foundation for both real-time operational awareness and 
+          deep, historical AI analysis. Without this backbone, the sophisticated AI capabilities we explore next would not 
+          be possible.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="narrative-connector">
+      <strong>From Data to Intelligence:</strong> With a robust data pipeline in place, we can now turn our 
+      attention to the project's central innovation: teaching an AI to understand not just patterns in the data, 
+      but the underlying physics and causal relationships of the biome itself. This is where B2Twin diverges 
+      from conventional predictive modeling and enters the realm of true artificial intelligence.
+    </div>
+  </div>
+
+  <!-- Section 2.3: RAG-Based SLM Training -->
+  <div class="page-section" id="section-4">
+    <div class="diagram-section">
+      <div class="diagram-title">2.3 Forging a Biome-Specific Intelligence with RAG</div>
+      <div class="diagram-subtitle">Teaching an SLM to Understand Physics, Not Just Patterns</div>
+      
+      <div class="diagram-container">
+        <img src="diagram-3-rag.png" alt="RAG-based SLM training architecture showing knowledge and time-series fusion">
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">The "Secret Sauce" - RAG-Based Causal Learning</div>
+        <div class="explanation-text">
+          <p><strong>Beyond Correlation to Causation:</strong> Standard AI models might learn that a valve command 
+          signal is statistically correlated with a temperature drop. Our approach goes fundamentally deeper by 
+          teaching the model why this relationship exists. This is the critical innovation that transforms B2Twin 
+          from a pattern-matching system into a true intelligent agent.</p>
+          
+          <p><strong>The RAG Architecture:</strong> We implement a Retrieval-Augmented 
+          Generation (RAG) system—a cutting-edge AI design pattern. The process works as follows: We ingest the 
+          official "Biosphere 2 Sensor Descriptions" document (a comprehensive technical manual describing every 
+          sensor, every control loop, and every physical relationship) into a vector database. This creates a 
+          searchable knowledge base of the biome's operational logic and physical principles.</p>
+          
+          <p><strong>Knowledge Infusion During Training:</strong> During the fine-tuning 
+          process, when the Small Language Model (SLM) encounters a change in the time-series data—for example, a 
+          shift in the CCVlvCmd (Cooling Coil Valve Command) signal—it doesn't just see a number changing. The 
+          training system queries the vector database and retrieves the relevant textual context: "This command 
+          controls the Cooling Coil Valve, which regulates chilled water flow through the coil to cool the supply 
+          air. Opening the valve increases cooling capacity."</p>
+          
+          <p><strong>Learning Causal Physics:</strong> By augmenting numerical data with 
+          descriptive, causal context during training, the SLM learns explicit cause-and-effect relationships. It 
+          understands that the valve command doesn't just correlate with temperature—it causes temperature change 
+          through a specific physical mechanism. It learns the difference between setpoints (Sp), commands (Cmd), 
+          measurements (Tmp), and feedback states (Sts). It internalizes the language and logic of control theory.</p>
+          
+          <p><strong>The Result - A Digital Biome Operator:</strong> The output is not 
+          a generic time-series forecasting model. It is a highly specialized AI that understands the specific 
+          language, physics, and operational logic of the Rainforest biome—a "Digital Biome Operator" that can 
+          reason about interventions, diagnose anomalies, and suggest optimizations based on deep causal understanding, 
+          not shallow statistical patterns.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="narrative-connector">
+      <strong>From Understanding to Action:</strong> A model that understands the physics of the system is 
+      powerful, but the ultimate goal of B2Twin is autonomous action—robots that can manage complex ecosystems 
+      with minimal human intervention. The biome-specific SLM becomes the foundation for the next phase: 
+      embedding this intelligence within reinforcement learning agents that learn through interaction with 
+      high-fidelity simulations.
+    </div>
+  </div>
+
+  <!-- Section 2.4: RL Loop for AMR Training -->
+  <div class="page-section" id="section-5">
+    <div class="diagram-section">
+      <div class="diagram-title">2.4 The Roadmap to Physical AI: Reinforcement Learning Loop</div>
+      <div class="diagram-subtitle">Training Autonomous Agents in High-Fidelity Simulation</div>
+      
+      <div class="diagram-container">
+        <img src="diagram-4-rl.png" alt="Reinforcement learning loop for training autonomous mobile robots">
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Closing the Loop - From Intelligence to Autonomy</div>
+        <div class="explanation-text">
+          <p><strong>The Ultimate Goal:</strong> The endgame for B2Twin is not just understanding the biome—it's 
+          autonomous management. We aim to train Autonomous Mobile Robots (AMRs) capable of performing complex tasks 
+          like precision agriculture, environmental monitoring, and ecosystem maintenance with minimal human oversight. 
+          This is achieved through reinforcement learning (RL) in high-fidelity simulation powered by NVIDIA Omniverse 
+          and Unreal Engine 5.</p>
+          
+          <p><strong>The Biome-Specific SLM as Foundation:</strong> The "Rainforest Operator" 
+          SLM created in the previous step becomes the core reasoning engine of the AMR agent's policy network. This gives 
+          the agent a massive advantage from day one—it doesn't start with a blank slate. It begins training with a deep, 
+          causal understanding of how the environment works, dramatically accelerating learning and improving sample efficiency.</p>
+          
+          <p><strong>The Reinforcement Learning Loop:</strong> The agent operates in a continuous 
+          feedback cycle. It observes the current state of the simulated environment (sensor readings, visual inputs, robot 
+          position). Based on this state and its policy (informed by the SLM), it selects an action—perhaps moving a robotic 
+          arm to harvest a fruit, adjusting an irrigation valve, or repositioning to inspect a plant. The simulation computes 
+          the outcome of this action using high-fidelity physics and returns both the new state and a reward signal (e.g., 
+          +1 for successful harvest, -0.1 for inefficient movement, -10 for collision).</p>
+          
+          <p><strong>Policy Optimization:</strong> An RL training algorithm (such as Proximal 
+          Policy Optimization or Soft Actor-Critic) runs on the University of Arizona HPC clusters, continuously analyzing 
+          millions of these state-action-reward sequences. Through gradient descent, it updates the agent's policy network 
+          to maximize expected cumulative rewards—in essence, teaching the robot to make better decisions over time through 
+          trial and error.</p>
+          
+          <p><strong>Sim-to-Real Transfer:</strong> A critical challenge in robotics is ensuring 
+          that behaviors learned in simulation transfer successfully to the real world. We address this through Domain 
+          Randomization—systematically varying the simulation's physics parameters, lighting conditions, texture properties, 
+          and sensor noise profiles during training. This forces the agent to develop robust policies that work across a wide 
+          range of conditions, making it resilient to the inevitable differences between simulation and reality.</p>
+          
+          <p><strong>The Path to Deployment:</strong> Once the agent demonstrates reliable 
+          performance across diverse simulated scenarios, we deploy it to physical hardware—initially in controlled tests, 
+          then progressively in more autonomous operations. The combination of physics-aware intelligence (from the SLM) and 
+          robust learned behaviors (from RL) creates autonomous systems capable of managing complex, dynamic ecosystems.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="narrative-connector">
+      <strong>Grounding the Vision in Reality:</strong> The architectural diagrams demonstrate sophisticated 
+      design and ambitious capabilities. To build confidence that this vision is achievable, we need to show 
+      the concrete technology stack—the specific tools, versions, and platforms—that will bring this 
+      architecture to life.
+    </div>
+  </div>
+
+  <!-- Section 2.5: Technology Stack Table -->
+  <div class="page-section" id="section-6">
+    <div class="diagram-section">
+      <div class="diagram-title">2.5 B2Twin Core Technology Stack</div>
+      <div class="diagram-subtitle">Enterprise-Grade, Open-Source, and Cutting-Edge Tools</div>
+      
+      <table class="tech-stack-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Primary Technology</th>
+            <th>Version/Type</th>
+            <th>Role in B2Twin</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Simulation & Digital Twin</td>
+            <td>NVIDIA Omniverse</td>
+            <td>Enterprise (EDU License)</td>
+            <td>Real-time collaboration, USD-based world model, physics simulation foundation</td>
+          </tr>
+          <tr>
+            <td>High-Fidelity Visualization</td>
+            <td>Unreal Engine</td>
+            <td>5.6 (EDU License)</td>
+            <td>Interactive experiences, photorealistic rendering of digital twin assets</td>
+          </tr>
+          <tr>
+            <td>Robotics Simulation</td>
+            <td>NVIDIA Isaac Sim / Isaac Lab</td>
+            <td>5.0 / 2.2 (Open Source)</td>
+            <td>AMR training, reinforcement learning environments, sim-to-real validation</td>
+          </tr>
+          <tr>
+            <td>Data Streaming</td>
+            <td>Apache Kafka</td>
+            <td>4.0.0 (Open Source)</td>
+            <td>High-throughput, low-latency ingestion of all real-time sensor data streams</td>
+          </tr>
+          <tr>
+            <td>Time-Series Database</td>
+            <td>TimescaleDB</td>
+            <td>3.0 (PostgreSQL Extension)</td>
+            <td>High-performance storage and querying of sensor time-series data</td>
+          </tr>
+          <tr>
+            <td>Knowledge Base</td>
+            <td>Milvus / Zilliz</td>
+            <td>Open Source</td>
+            <td>Vector database for storing text embeddings for the RAG system</td>
+          </tr>
+          <tr>
+            <td>Small Language Model</td>
+            <td>Llama 3.2 / Phi-3</td>
+            <td>3B-11B parameters</td>
+            <td>Core reasoning engine for the biome-specific AI agent</td>
+          </tr>
+          <tr>
+            <td>Edge Compute</td>
+            <td>NVIDIA Jetson</td>
+            <td>AGX Orin 64GB</td>
+            <td>On-robot deployment platform for trained AI models and real-time control loops</td>
+          </tr>
+          <tr>
+            <td>MLOps</td>
+            <td>MLflow + DVC</td>
+            <td>Open Source</td>
+            <td>Experiment tracking, model registry, and data versioning for reproducibility</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="explanation">
+        <div class="explanation-title">A Modern, Production-Ready Stack</div>
+        <div class="explanation-text">
+          <p><strong>Strategic Technology Choices:</strong> The B2Twin technology stack represents a carefully 
+          curated selection of industry-leading, enterprise-grade, and open-source tools. Each technology was 
+          chosen for its maturity, scalability, and strong community support. This is not an experimental 
+          hodgepodge—it is a production-ready architecture.</p>
+          
+          <p><strong>Open Source Foundation:</strong> Wherever possible, we leverage 
+          open-source technologies (Kafka, TimescaleDB, Milvus, Isaac Lab, MLflow, DVC). This ensures transparency, 
+          reproducibility, and freedom from vendor lock-in. It also aligns with the university's research mission 
+          and enables global collaboration with academic partners.</p>
+          
+          <p><strong>Strategic Commercial Partnerships:</strong> For simulation and 
+          visualization—domains where cutting-edge capability is critical—we leverage NVIDIA Omniverse and Unreal 
+          Engine through educational licenses. These platforms provide capabilities (real-time photorealistic rendering, 
+          physics-accurate simulation, USD interoperability) that would take years to develop internally.</p>
+          
+          <p><strong>Edge-to-Cloud Architecture:</strong> The stack spans the full spectrum 
+          from edge devices (NVIDIA Jetson AGX Orin for on-robot inference) to cloud-scale data lakes (AWS S3) and 
+          HPC clusters (UA Puma and Ocelote). This hybrid architecture maximizes efficiency—training happens on powerful 
+          GPUs, inference happens on edge devices, and data archival leverages cost-effective cloud storage.</p>
+          
+          <p><strong>Built for Research and Production:</strong> The MLOps tools (MLflow, DVC) 
+          ensure that every experiment is tracked, every model is versioned, and every result is reproducible. This is 
+          essential for both rigorous scientific research and for transitioning successful models into production deployment.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Closing Summary -->
+  <div class="page-section" id="section-7">
+    <div class="section-header">
+      <div class="section-number">TECHNICAL SUMMARY</div>
+      <div class="section-title">A Cohesive Architecture for Physical AI</div>
+      <div class="section-description">
+        From high-level context to specific implementation details, the B2Twin architecture 
+        demonstrates a sophisticated, well-engineered approach to digital twin technology and 
+        physical AI. Each component serves a clear purpose, and together they form a system 
+        capable of transforming how we understand and manage complex ecosystems.
+      </div>
+    </div>
+    
+    <div class="explanation">
+      <div class="explanation-title">The Complete Story</div>
+      <div class="explanation-text">
+        <p>This architecture documentation has walked through the complete B2Twin system in four progressive layers:</p>
+        
+        <p><strong>1. The Ecosystem View:</strong> Understanding 
+        the users, stakeholders, and external systems that B2Twin connects with, emphasizing the critical 
+        bi-directional feedback loop between digital and physical.</p>
+        
+        <p><strong>2. The Data Foundation:</strong> A modern, 
+        real-time streaming architecture built on industry-standard tools that ensures data integrity, 
+        scalability, and performance.</p>
+        
+        <p><strong>3. The Intelligence Core:</strong> An innovative 
+        RAG-based training approach that teaches Small Language Models to understand causal physics, not just 
+        statistical patterns, creating specialized "Digital Biome Operators."</p>
+        
+        <p><strong>4. The Autonomous Future:</strong> A reinforcement 
+        learning framework that transforms understanding into action, training robots in simulation for deployment 
+        in the real world.</p>
+        
+        <p><strong>Technical Credibility:</strong> The concrete technology stack demonstrates 
+        that this vision is grounded in mature, proven tools. The architecture is ambitious but achievable, innovative 
+        but practical, cutting-edge but built on solid foundations.</p>
+        
+        <p><strong>Strategic Value:</strong> This is not just a technical system—it is 
+        a strategic asset for the University of Arizona. It positions the institution at the forefront of physical AI 
+        research, provides a world-class platform for graduate education, and creates opportunities for partnerships 
+        with industry and space agencies.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navigation state
+    let currentSection = 0;
+    const totalSections = 8;
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNavigation();
+      updateProgress();
+      
+      // Keyboard navigation
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          navigatePage(1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          navigatePage(-1);
+        }
+      });
+      
+      // Section dot clicks
+      document.querySelectorAll('.section-dot').forEach((dot, index) => {
+        dot.addEventListener('click', () => goToSection(index));
+      });
+      
+      // Update progress on scroll
+      window.addEventListener('scroll', updateProgress);
+    });
+    
+    function navigatePage(direction) {
+      const newSection = currentSection + direction;
+      if (newSection >= 0 && newSection < totalSections) {
+        goToSection(newSection);
+      }
+    }
+    
+    function goToSection(sectionIndex) {
+      currentSection = sectionIndex;
+      const element = document.getElementById(`section-${sectionIndex}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        updateNavigation();
+      }
+    }
+    
+    function updateNavigation() {
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      prevBtn.disabled = currentSection === 0;
+      nextBtn.disabled = currentSection === totalSections - 1;
+      
+      // Update section dots
+      document.querySelectorAll('.section-dot').forEach((dot, index) => {
+        if (index === currentSection) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+    
+    function updateProgress() {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight - windowHeight;
+      const scrolled = window.scrollY;
+      const progress = (scrolled / documentHeight) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+  </script>
+
+</body>
+</html>
